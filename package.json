@@ -3,12 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "jake run"
   },
   "author": "Mason Browne <m.public@academy15.com> (http://www.masonbrowne.com/)",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "rx": "2.3.8",
     "thicket": "0.3.4",

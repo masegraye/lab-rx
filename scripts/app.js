@@ -1,4 +1,4 @@
-var LabRx        = require("./src/lab-rx"),
+var LabRx        = require("../src/lab-rx"),
     thicket      = require("thicket"),
     Logger       = thicket.c("logger"),
     CLA          = thicket.c("appenders/console-log"),

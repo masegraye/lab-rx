@@ -1,3 +1,5 @@
 {
-  "global": {}
+  "global": {
+    "lab-rx": "sample configuration value"
+  }
 }

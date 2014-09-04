@@ -21,6 +21,7 @@ var mod = function(
 
     up: Promise.method(function() {
       Log.debug("Coming up...");
+      Log.debug("Config value;", this.config("lab-rx"));
     }),
     down: Promise.method(function() {
       Log.debug("Going down...");
