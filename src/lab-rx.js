@@ -22,7 +22,121 @@ var mod = function(
     up: Promise.method(function() {
       Log.debug("Coming up...");
       Log.debug("Config value;", this.config("lab-rx"));
+
+      return Promise.bind(this)
+        .then(function() {
+          return this._exampleOne();
+        })
+        .then(function() {
+          return this._exampleTwo();
+        })
+        .then(function() {
+          return this._exampleThree()
+        });
+
     }),
+
+    _exampleOne: Promise.method(function() {
+      var log = Logger.create("exampleOne");
+
+      var source = Rx.Observable.create(function(observer) {
+        observer.onNext(42);
+        observer.onCompleted();
+
+        return function() {
+          log.debug("source; disposed");
+        };
+      });
+
+      var p1 = new Promise(function(resolve, reject){
+        var sub1 = source.subscribe(
+          function(x){ log.debug("sub1; onNext;", x)},
+          function(e){ log.debug("sub1; onError;", e) },
+          function(){ log.debug("sub1; onComplete"); resolve(); });
+      });
+
+      var p2 = new Promise(function(resolve, reject) {
+        var sub2 = source.subscribe(
+          function(x){ log.debug("sub2; onNext;", x)},
+          function(e){ log.debug("sub2; onError;", e)},
+          function(){ log.debug("sub2; onComplete"); resolve(); });
+      });
+
+      return Promise.all([p1, p2]);
+    }),
+
+    _exampleTwo: Promise.method(function() {
+      var log = Logger.create("exampleTwo");
+      var source = Rx.Observable.range(1, 5);
+
+      return Promise.all(_.times(5, function(i) {
+        return new Promise(function(resolve, reject) {
+          source.subscribe(
+          function(x){
+            log.debug("onNext", i, x);
+          },
+          function(e) {
+            log.debug("onError;", i, e);
+          },
+          function() {
+            log.debug("onComplete;", i);
+            resolve();
+          });
+        });
+      }));
+
+    }),
+
+    _exampleThree: Promise.method(function() {
+      var log = Logger.create("exampleThree");
+
+      var p1 = new Promise(function(resolve, reject) {
+        var promise = new Promise(function(innerResolve, innerReject) {
+          process.nextTick(function() {
+            innerResolve(42);
+          });
+        });
+
+        var source = Rx.Observable.fromPromise(promise);
+
+        source.subscribe(
+          function(x){
+            log.debug("onNext;", x);
+          },
+          function(e) {
+            log.debug("onError;", e);
+          },
+          function() {
+            log.debug("onComplete");
+            resolve()
+          });
+      });
+
+      var p2 = new Promise(function(resolve, reject) {
+        var promise = new Promise(function(innerResolve, innerReject) {
+          process.nextTick(function(){
+            innerReject(new Error("Reason for rejection"));
+          });
+        });
+
+        var source = Rx.Observable.fromPromise(promise);
+        source.subscribe(
+          function(x){
+            log.debug("onNext;", x);
+          },
+          function(e) {
+            log.debug("onError;", e);
+            resolve();
+          },
+          function() {
+            log.debug("onComplete");
+            resolve();
+          });
+      });
+
+      return Promise.all([p1, p2]);
+    }),
+
     down: Promise.method(function() {
       Log.debug("Going down...");
     })
