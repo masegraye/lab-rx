@@ -5,7 +5,8 @@ var mod = function(
   Promise,
   Rx,
   App,
-  Logger
+  Logger,
+  EventEmitter
 ) {
 
   var LabRx = function() {
@@ -32,9 +33,12 @@ var mod = function(
         })
         .then(function() {
           return this._exampleThree()
-        }).
-        then(function() {
+        })
+        .then(function() {
           return this._exampleFour();
+        })
+        .then(function() {
+          return this._exampleFive();
         });
     }),
 
@@ -160,6 +164,41 @@ var mod = function(
       });
     }),
 
+    _exampleFive: Promise.method(function() {
+      var log      = Logger.create("exampleFive"),
+          emitter  = new EventEmitter(),
+          val      = 0,
+          eventSeq = Rx.Observable.fromEvent(emitter, 'newEntry'),
+          cancel   = eventSeq.bufferWithCount(20),
+          worker   = function() {
+            emitter.emit('newEntry', val++);
+          },
+          timeout = setInterval(worker, 50);
+
+
+      return new Promise(function(resolve, reject) {
+          eventSeq
+            .bufferWithCount(5)
+            .flatMap(function(x) {
+              return Rx.Observable.fromArray(x);
+            })
+            .bufferWithCount(10)
+            .takeUntil(cancel)
+            .forEach(
+              function(x) {
+                log.debug("Got `x`;", x);
+              },
+              function(e) {
+                reject(e);
+              },
+              function() {
+                resolve();
+              });
+      }).lastly(function() {
+        clearTimeout(timeout);
+      });
+    }),
+
     down: Promise.method(function() {
       Log.debug("Going down...");
     })
@@ -173,5 +212,6 @@ module.exports = mod(
   require("bluebird"),
   require("rx"),
   require("thicket").c("app"),
-  require("thicket").c("logger")
+  require("thicket").c("logger"),
+  require("events").EventEmitter
 );
