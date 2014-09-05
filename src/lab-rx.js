@@ -32,8 +32,10 @@ var mod = function(
         })
         .then(function() {
           return this._exampleThree()
+        }).
+        then(function() {
+          return this._exampleFour();
         });
-
     }),
 
     _exampleOne: Promise.method(function() {
@@ -84,7 +86,6 @@ var mod = function(
           });
         });
       }));
-
     }),
 
     _exampleThree: Promise.method(function() {
@@ -135,6 +136,28 @@ var mod = function(
       });
 
       return Promise.all([p1, p2]);
+    }),
+
+    _exampleFour: Promise.method(function() {
+      var log    = Logger.create("exampleFour"),
+          seq    = Rx.Observable.range(1, 100),
+          bufSeq = seq.bufferWithCount(5);
+
+      return new Promise(function(resolve, reject) {
+        bufSeq
+          .map(function(ary) {
+            log.debug("mapped value", ary);
+            return ary.length;
+          })
+          .subscribe(function(len) {
+            log.debug("Length of buffered items", len);
+          }, function(e){
+            log.debug("Error", e);
+          }, function(){
+            log.debug("Finishing!");
+            resolve();
+          });
+      });
     }),
 
     down: Promise.method(function() {
