@@ -5,7 +5,8 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "jake run"
+    "lab": "jake lab",
+    "web": "jake web"
   },
   "author": "Mason Browne <m.public@academy15.com> (http://www.masonbrowne.com/)",
   "license": "MIT",
